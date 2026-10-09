@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control Bluetooth Micro:bit - 6 LEDs</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        #status {
+            font-size: 14px;
+            color: #ff5252;
+            margin-bottom: 20px;
+        }
+        .btn-connect {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 25px;
+            font-weight: bold;
+        }
+        .led-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .led-card {
+            background-color: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .led-title {
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .button-group button {
+            padding: 10px 15px;
+            font-size: 14px;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+        .btn-on {
+            background-color: #2196F3;
+            color: white;
+        }
+        .btn-off {
+            background-color: #f44336;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Control de 6 LEDs Micro:bit</h1>
+    <div id="status">Desconectado</div>
+    <button class="btn-connect" onclick="conectarBluetooth()">Conectar Bluetooth</button>
+
+    <div class="led-container">
+        <!-- LED 1 -->
+        <div class="led-card">
+            <span class="led-title">LED 1 (Pin 0)</span>
+            <div class="button-group">
+                <button class="btn-on" onclick="enviarComando('A')">ON</button>
+                <button class="btn-off" onclick="enviarComando('a')">OFF</button>
+            </div>
+        </div>
+        <!-- LED 2 -->
+        <div class="led-card">
+            <span class="led-title">LED 2 (Pin 1)</span>
+            <div class="button-group">
+                <button class="btn-on" onclick="enviarComando('B')">ON</button>
+                <button class="btn-off" onclick="enviarComando('b')">OFF</button>
+            </div>
+        </div>
+        <!-- LED 3 -->
+        <div class="led-card">
+            <span class="led-title">LED 3 (Pin 2)</span>
+            <div class="button-group">
+                <button class="btn-on" onclick="enviarComando('C')">ON</button>
+                <button class="btn-off" onclick="enviarComando('c')">OFF</button>
+            </div>
+        </div>
+        <!-- LED 4 -->
+        <div class="led-card">
+            <span class="led-title">LED 4 (Pin 8)</span>
+            <div class="button-group">
+                <button class="btn-on" onclick="enviarComando('D')">ON</button>
+                <button class="btn-off" onclick="enviarComando('d')">OFF</button>
+            </div>
+        </div>
+        <!-- LED 5 -->
+        <div class="led-card">
+            <span class="led-title">LED 5 (Pin 12)</span>
+            <div class="button-group">
+                <button class="btn-on" onclick="enviarComando('E')">ON</button>
+                <button class="btn-off" onclick="enviarComando('e')">OFF</button>
+            </div>
+        </div>
+        <!-- LED 6 -->
+        <div class="led-card">
+            <span class="led-title">LED 6 (Pin 16)</span>
+            <div class="button-group">
+                <button class="btn-on" onclick="enviarComando('F')">ON</button>
+                <button class="btn-off" onclick="enviarComando('f')">OFF</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let bluetoothDevice;
+        let uartCharacteristic;
+
+        const UART_SERVICE_UUID = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
+        const UART_TX_CHAR_UUID = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
+
+        async function conectarBluetooth() {
+            try {
+                document.getElementById('status').innerText = "Buscando micro:bit...";
+                
+                bluetoothDevice = await navigator.bluetooth.requestDevice({
+                    filters: [{ namePrefix: "BBC micro:bit" }],
+                    optionalServices: [UART_SERVICE_UUID]
+                });
+
+                const server = await bluetoothDevice.gatt.connect();
+                const service = await server.getPrimaryService(UART_SERVICE_UUID);
+                uartCharacteristic = await service.getCharacteristic(UART_TX_CHAR_UUID);
+
+                document.getElementById('status').innerText = "¡Conectado!";
+                document.getElementById('status').style.color = "#4CAF50";
+            } catch (error) {
+                console.error(error);
+                document.getElementById('status').innerText = "Error de conexión";
+                document.getElementById('status').style.color = "#ff5252";
+            }
+        }
+
+        async function enviarComando(comando) {
+            if (!uartCharacteristic) {
+                alert("¡Primero conéctate a la micro:bit por Bluetooth!");
+                return;
+            }
+            try {
+                const encoder = new TextEncoder();
+                await uartCharacteristic.writeValue(encoder.encode(comando));
+            } catch (error) {
+                console.error("Error al enviar comando:", error);
+            }
+        }
+    </script>
+</body>
+</html>
