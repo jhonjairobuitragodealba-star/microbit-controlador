@@ -179,7 +179,7 @@
             try {
                 const datos = new TextEncoder().encode(comando + "#");
 
-                await uartRxCharacteristic.writeValue(datos);
+                await uartRxCharacteristic.writeValueWithoutResponse(datos);
 
                 document.getElementById("status").innerText =
                     "Comando enviado: " + comando;
