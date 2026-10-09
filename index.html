@@ -159,23 +159,19 @@
         }
 
         async function enviarComando(comando) {
-            if (!bluetoothDevice || !bluetoothDevice.gatt.connected) {
-                alert("¡La micro:bit se desconectó! Por favor, conéctate de nuevo.");
+            if (!uartCharacteristic || !bluetoothDevice.gatt.connected) {
+                alert("¡Primero conéctate a la micro:bit por Bluetooth!");
                 document.getElementById('status').innerText = "Desconectado";
                 document.getElementById('status').style.color = "#ff5252";
                 return;
             }
             try {
-                const server = await bluetoothDevice.gatt.connect();
-                const service = await server.getPrimaryService(UART_SERVICE_UUID);
-                const characteristic = await service.getCharacteristic(UART_TX_CHAR_UUID);
-                
                 const encoder = new TextEncoder();
-                await characteristic.writeValue(encoder.encode(comando));
+                await uartCharacteristic.writeValue(encoder.encode(comando));
                 console.log("Comando enviado: " + comando);
             } catch (error) {
                 console.error("Error al enviar comando:", error);
-                alert("Error al enviar. Asegúrate de que la micro:bit esté cerca y conectada.");
+                alert("Error al enviar. Vuelve a conectar.");
             }
         }
     </script>
