@@ -4,194 +4,224 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Control Bluetooth Micro:bit</title>
+
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #1e1e2f, #2d2d44);
-            color: #ffffff;
+            color: white;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 20px;
-            margin: 0;
+            justify-content: center;
             min-height: 100vh;
+            margin: 0;
+            padding: 20px 0;
         }
+
         .card {
             background: #252538;
             padding: 25px;
             border-radius: 15px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.4);
             text-align: center;
-            width: 100%;
-            max-width: 380px;
+            width: min(340px, 85%);
         }
-        h2 { margin-bottom: 15px; color: #00bcd4; font-size: 22px; }
-        button {
-            padding: 12px;
+
+        h2 {
+            color: #00bcd4;
+        }
+
+        #btnConnect {
+            background: #ff9800;
+            color: white;
+            width: 100%;
+            padding: 14px;
             font-size: 16px;
             font-weight: bold;
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            transition: 0.3s;
         }
-        #btnConnect { 
-            background-color: #ff9800; 
-            color: white; 
-            width: 100%;
-            margin-bottom: 20px;
+
+        .led {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
         }
-        #btnConnect:hover { background-color: #e68900; }
-        
-        .led-container {
-            display: none;
-            flex-direction: column;
-            gap: 12px;
-            width: 100%;
-        }
-        .led-row {
-            background: #2e2e48;
-            padding: 10px 15px;
-            border-radius: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .led-label {
-            font-size: 15px;
+
+        .led button {
+            padding: 12px 5px;
+            border: none;
+            border-radius: 8px;
+            color: white;
             font-weight: bold;
-            color: #fff;
+            cursor: pointer;
         }
-        .btn-group {
-            display: flex;
-            gap: 6px;
+
+        .on {
+            background: #4CAF50;
         }
-        .btn-on { background-color: #2196F3; color: white; padding: 8px 12px; font-size: 14px; }
-        .btn-off { background-color: #f44336; color: white; padding: 8px 12px; font-size: 14px; }
-        .btn-on:hover { opacity: 0.9; }
-        .btn-off:hover { opacity: 0.9; }
+
+        .off {
+            background: #f44336;
+        }
+
+        button:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
 
         #status {
-            margin-top: 15px;
+            margin-top: 18px;
             font-size: 14px;
-            color: #aaa;
+            color: #ccc;
+            overflow-wrap: anywhere;
         }
     </style>
 </head>
-<body>
 
+<body>
     <div class="card">
-        <h2>Control de 6 LEDs</h2>
-        <button id="btnConnect" onclick="conectarBluetooth()">Conectar Bluetooth</button>
-        
-        <div id="ledContainer" class="led-container">
-            <!-- LED 1 (Pin 0) -->
-            <div class="led-row">
-                <span class="led-label">LED 1 (P0)</span>
-                <div class="btn-group">
-                    <button class="btn-on" onclick="enviarComando('A')">ON</button>
-                    <button class="btn-off" onclick="enviarComando('a')">OFF</button>
-                </div>
-            </div>
-            <!-- LED 2 (Pin 1) -->
-            <div class="led-row">
-                <span class="led-label">LED 2 (P1)</span>
-                <div class="btn-group">
-                    <button class="btn-on" onclick="enviarComando('B')">ON</button>
-                    <button class="btn-off" onclick="enviarComando('b')">OFF</button>
-                </div>
-            </div>
-            <!-- LED 3 (Pin 2) -->
-            <div class="led-row">
-                <span class="led-label">LED 3 (P2)</span>
-                <div class="btn-group">
-                    <button class="btn-on" onclick="enviarComando('C')">ON</button>
-                    <button class="btn-off" onclick="enviarComando('c')">OFF</button>
-                </div>
-            </div>
-            <!-- LED 4 (Pin 8) -->
-            <div class="led-row">
-                <span class="led-label">LED 4 (P8)</span>
-                <div class="btn-group">
-                    <button class="btn-on" onclick="enviarComando('D')">ON</button>
-                    <button class="btn-off" onclick="enviarComando('d')">OFF</button>
-                </div>
-            </div>
-            <!-- LED 5 (Pin 12) -->
-            <div class="led-row">
-                <span class="led-label">LED 5 (P12)</span>
-                <div class="btn-group">
-                    <button class="btn-on" onclick="enviarComando('E')">ON</button>
-                    <button class="btn-off" onclick="enviarComando('e')">OFF</button>
-                </div>
-            </div>
-            <!-- LED 6 (Pin 16) -->
-            <div class="led-row">
-                <span class="led-label">LED 6 (P16)</span>
-                <div class="btn-group">
-                    <button class="btn-on" onclick="enviarComando('F')">ON</button>
-                    <button class="btn-off" onclick="enviarComando('f')">OFF</button>
-                </div>
-            </div>
+        <h2>Control Micro:bit</h2>
+
+        <button id="btnConnect" onclick="conectarBluetooth()">
+            Conectar Bluetooth
+        </button>
+
+        <div class="led">
+            <button class="on" data-cmd="A" disabled>LED 1 · Encender</button>
+            <button class="off" data-cmd="B" disabled>LED 1 · Apagar</button>
+
+            <button class="on" data-cmd="C" disabled>LED 2 · Encender</button>
+            <button class="off" data-cmd="D" disabled>LED 2 · Apagar</button>
+
+            <button class="on" data-cmd="E" disabled>LED 3 · Encender</button>
+            <button class="off" data-cmd="F" disabled>LED 3 · Apagar</button>
+
+            <button class="on" data-cmd="G" disabled>LED 4 · Encender</button>
+            <button class="off" data-cmd="H" disabled>LED 4 · Apagar</button>
+
+            <button class="on" data-cmd="I" disabled>LED 5 · Encender</button>
+            <button class="off" data-cmd="J" disabled>LED 5 · Apagar</button>
+
+            <button class="on" data-cmd="K" disabled>LED 6 · Encender</button>
+            <button class="off" data-cmd="L" disabled>LED 6 · Apagar</button>
         </div>
 
         <p id="status">Estado: Desconectado</p>
     </div>
 
     <script>
-        const UART_SERVICE_UUID = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
-        const UART_TX_CHAR_UUID = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
+        const UART_SERVICE_UUID =
+            "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
+
+        const UART_RX_CHAR_UUID =
+            "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
 
         let bluetoothDevice;
-        let uartTxCharacteristic;
+        let uartRxCharacteristic;
 
         async function conectarBluetooth() {
             try {
-                document.getElementById('status').innerText = "Buscando micro:bit...";
-                
+                if (!navigator.bluetooth) {
+                    throw new Error(
+                        "Usa Chrome o Edge en un dispositivo compatible con Bluetooth."
+                    );
+                }
+
+                document.getElementById("status").innerText =
+                    "Buscando micro:bit...";
+
                 bluetoothDevice = await navigator.bluetooth.requestDevice({
                     filters: [{ namePrefix: "BBC micro:bit" }],
                     optionalServices: [UART_SERVICE_UUID]
                 });
 
-                document.getElementById('status').innerText = "Conectando al servidor GATT...";
+                document.getElementById("status").innerText =
+                    "Conectando...";
+
                 const server = await bluetoothDevice.gatt.connect();
 
-                document.getElementById('status').innerText = "Buscando servicio UART...";
-                const service = await server.getPrimaryService(UART_SERVICE_UUID);
+                const service =
+                    await server.getPrimaryService(UART_SERVICE_UUID);
 
-                uartTxCharacteristic = await service.getCharacteristic(UART_TX_CHAR_UUID);
+                // Para ENVIAR comandos se necesita la característica RX.
+                uartRxCharacteristic =
+                    await service.getCharacteristic(UART_RX_CHAR_UUID);
 
-                document.getElementById('status').innerText = "¡Conectado con éxito!";
-                document.getElementById('btnConnect').style.display = "none";
-                document.getElementById('ledContainer').style.display = "flex";
+                document.getElementById("status").innerText =
+                    "¡Conectado con éxito!";
 
-                bluetoothDevice.addEventListener('gattserverdisconnected', onDisconnected);
+                document.getElementById("btnConnect").innerText =
+                    "Desconectar Bluetooth";
+
+                activarBotones(true);
+
+                document.getElementById("btnConnect").onclick =
+                    desconectarBluetooth;
+
+                bluetoothDevice.addEventListener(
+                    "gattserverdisconnected",
+                    alDesconectar
+                );
 
             } catch (error) {
-                console.error(error);
-                document.getElementById('status').innerText = "Error de conexión: " + error;
+                document.getElementById("status").innerText =
+                    "Error: " + error.message;
             }
         }
 
         async function enviarComando(comando) {
-            if (!uartTxCharacteristic) return;
+            if (!uartRxCharacteristic) return;
 
             try {
-                const encoder = new TextEncoder();
-                await uartTxCharacteristic.writeValueWithoutResponse(encoder.encode(comando + "\n"));
-                console.log("Comando enviado: " + comando);
+                const datos = new TextEncoder().encode(comando + "#");
+
+                await uartRxCharacteristic.writeValue(datos);
+
+                document.getElementById("status").innerText =
+                    "Comando enviado: " + comando;
+
             } catch (error) {
-                console.error("Error al enviar dato: ", error);
+                document.getElementById("status").innerText =
+                    "Error al enviar: " + error.message;
             }
         }
 
-        function onDisconnected() {
-            document.getElementById('status').innerText = "Dispositivo desconectado.";
-            document.getElementById('btnConnect').style.display = "block";
-            document.getElementById('ledContainer').style.display = "none";
+        function activarBotones(estado) {
+            document.querySelectorAll(".led button").forEach(boton => {
+                boton.disabled = !estado;
+            });
         }
-    </script>
 
+        function desconectarBluetooth() {
+            if (bluetoothDevice && bluetoothDevice.gatt.connected) {
+                bluetoothDevice.gatt.disconnect();
+            }
+        }
+
+        function alDesconectar() {
+            uartRxCharacteristic = null;
+
+            activarBotones(false);
+
+            document.getElementById("status").innerText =
+                "Estado: Desconectado";
+
+            document.getElementById("btnConnect").innerText =
+                "Conectar Bluetooth";
+
+            document.getElementById("btnConnect").onclick =
+                conectarBluetooth;
+        }
+
+        document.querySelectorAll(".led button").forEach(boton => {
+            boton.addEventListener("click", () => {
+                enviarComando(boton.dataset.cmd);
+            });
+        });
+    </script>
 </body>
 </html>
